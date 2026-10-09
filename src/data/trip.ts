@@ -1,0 +1,179 @@
+import type { TripData } from '../types'
+
+const DAY = 86_400_000
+const HOUR = 3_600_000
+
+const now = Date.now()
+const start = now + 12 * DAY + 6 * HOUR
+
+const cover = (seed: string) => `https://picsum.photos/seed/${seed}/900/1500`
+const thumb = (seed: string) => `https://picsum.photos/seed/${seed}/300/300`
+
+export const tripData: TripData = {
+  trip: {
+    id: 'vietnam-hanoi-2025',
+    title: 'Vietnam Family Escape',
+    destination: 'Vietnam',
+    homeCity: 'Chennai',
+    startDate: start,
+    endDate: start + 6 * DAY,
+    travellers: 4,
+    brand: { name: 'LocoTrails' },
+  },
+  flight: {
+    airline: 'IndiGo',
+    flightNumber: '6E 1049',
+    departTime: start,
+    reportBy: start - 3 * HOUR,
+    from: { city: 'Chennai', code: 'MAA', terminal: 'T2' },
+    to: { city: 'Hanoi', code: 'HAN', terminal: 'T2' },
+  },
+  baggage: { checkInPerPax: 20, cabinPerPax: 7 },
+  packing: [
+    {
+      group: 'Documents & Money',
+      items: ['4 passports', 'Vietnam e-visa', 'Travel insurance', 'Flight confirmations', 'Cards + emergency cash'],
+    },
+    {
+      group: 'Electronics',
+      items: ['Phones', 'Phone chargers', 'Power banks (cabin only)', 'Travel adapter', 'Headphones'],
+    },
+    {
+      group: 'Clothing (per person)',
+      items: ['T-shirts / tops 5–6', 'Bottoms 3', 'Innerwear 7–8', 'Sleepwear 2', 'One light layer'],
+    },
+    {
+      group: 'Health & Toiletries',
+      items: ['Prescription medicines', 'Fever / pain medicine', 'Basic first-aid', 'Insect repellent', 'Sunscreen'],
+    },
+    {
+      group: 'Child Kit',
+      items: ['Child medicines', 'Wet wipes', 'Favourite snacks', 'Small toy / activity', 'Comfort item'],
+    },
+    {
+      group: 'Day Bag',
+      items: ['Reusable water bottles', 'Wet wipes / tissues', 'Hand sanitizer', 'Compact umbrella'],
+    },
+  ],
+  days: [
+    {
+      n: 1,
+      date: start,
+      place: 'Hanoi',
+      coverImage: cover('hanoi-old-quarter'),
+      stay: 'Hanoi La Siesta, Old Quarter',
+      summary: 'Arrival, hotel check-in and an Old Quarter evening walk',
+      dayStart: '14:00',
+      dayEnd: '22:00',
+      pickup: '14:30',
+      drop: '22:00',
+      plannedHours: 6,
+      freeFrom: '19:30',
+      coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
+      driver: { name: 'Mr. Hung', phone: '+84 912 345 678', arrival: '14:15', car: 'Toyota Innova', carNumber: '29A-123.45' },
+      photoSpots: [
+        { name: 'Hoan Kiem Lake', image: thumb('hoan-kiem') },
+        { name: 'St Joseph Cathedral', image: thumb('st-joseph') },
+        { name: 'Train Street', image: thumb('train-street') },
+      ],
+      weather: { icon: 'cloud-sun', temp: '24–30°C', note: 'Humid with a chance of short showers' },
+      transit: { city: 'Bangkok (BKK)', note: '3h layover — keep boarding passes handy and check the gate on screens' },
+    },
+    {
+      n: 2,
+      date: start + DAY,
+      place: 'Halong Bay',
+      coverImage: cover('halong-bay'),
+      stay: 'Overnight cruise, Halong Bay',
+      summary: 'Cruise, kayaking and sunset on the bay',
+      dayStart: '07:30',
+      dayEnd: '21:00',
+      pickup: '07:15',
+      drop: '21:00',
+      plannedHours: 8,
+      freeFrom: '18:30',
+      coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
+      driver: { name: 'Mr. Tuan', phone: '+84 987 654 321', arrival: '07:00', car: 'Ford Transit', carNumber: '14A-556.78' },
+      photoSpots: [
+        { name: 'Sung Sot Cave', image: thumb('sung-sot') },
+        { name: 'Ti Top Island', image: thumb('ti-top') },
+        { name: 'Sunset on the sundeck', image: thumb('sundeck') },
+      ],
+      weather: { icon: 'sun', temp: '25–31°C', note: 'Clear and bright — great for the bay' },
+      transit: null,
+    },
+    {
+      n: 3,
+      date: start + 2 * DAY,
+      place: 'Ninh Binh',
+      coverImage: cover('ninh-binh'),
+      stay: 'Tam Coc Garden Resort',
+      summary: 'Trang An boat ride, Mua Cave viewpoint and cycling',
+      dayStart: '08:00',
+      dayEnd: '20:00',
+      pickup: '07:45',
+      drop: '20:00',
+      plannedHours: 7,
+      freeFrom: '17:30',
+      coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
+      driver: { name: 'Mr. Tuan', phone: '+84 987 654 321', arrival: '07:30', car: 'Ford Transit', carNumber: '14A-556.78' },
+      photoSpots: [
+        { name: 'Mua Cave viewpoint', image: thumb('mua-cave') },
+        { name: 'Trang An river', image: thumb('trang-an') },
+      ],
+      weather: { icon: 'cloud-sun', temp: '23–29°C', note: 'Mild with light cloud cover' },
+      transit: null,
+    },
+    {
+      n: 4,
+      date: start + 3 * DAY,
+      place: 'Hanoi',
+      coverImage: cover('hanoi-streets'),
+      stay: 'Day rooms, Hanoi',
+      summary: 'Old Quarter market, egg coffee and transfer to the airport',
+      dayStart: '09:00',
+      dayEnd: '18:00',
+      pickup: '09:00',
+      drop: '16:30',
+      plannedHours: 5,
+      freeFrom: '15:00',
+      coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
+      driver: { name: 'Mr. Hung', phone: '+84 912 345 678', arrival: '08:45', car: 'Toyota Innova', carNumber: '29A-123.45' },
+      photoSpots: [
+        { name: 'Dong Xuan Market', image: thumb('dong-xuan') },
+        { name: 'Cafe Giang', image: thumb('egg-coffee') },
+      ],
+      weather: { icon: 'cloud-sun', temp: '24–30°C', note: 'Warm and humid' },
+      transit: null,
+    },
+  ],
+  contacts: [
+    { label: '24×7 Helpline', phone: '+91 90000 00000' },
+    { label: 'Nandu · LocoTrails Ops', phone: '+91 90000 11111' },
+    { label: 'Hanoi Local Ops', phone: '+84 900 000 000' },
+    { label: 'Mr. Hung · Driver', phone: '+84 912 345 678' },
+  ],
+  cityBasics: {
+    city: 'Hanoi',
+    phrases: [
+      { text: 'Hello', native: 'Xin chào', lang: 'vi-VN' },
+      { text: 'Thank you', native: 'Cảm ơn', lang: 'vi-VN' },
+      { text: 'How much?', native: 'Bao nhiêu tiền?', lang: 'vi-VN' },
+      { text: 'Delicious', native: 'Ngon quá', lang: 'vi-VN' },
+    ],
+    facts: [
+      'Hanoi is over 1,000 years old and means "inside the river".',
+      'Egg coffee was invented here in the 1940s when milk was scarce.',
+      'The Old Quarter has 36 ancient streets, each named after the craft once sold there.',
+      'Motorbikes are the main way around — cross the road slowly and predictably.',
+    ],
+  },
+  postTrip: {
+    storytellingCircle: {
+      city: 'Chennai',
+      date: 'First Sunday of next month · 6 pm',
+      venue: 'LocoTrails Studio, Alwarpet',
+    },
+    referral: { bonus: '₹1,000 travel credit per confirmed friend' },
+  },
+}
