@@ -5,19 +5,20 @@ import { cn } from '../lib/cn'
 interface MobileFrameProps {
   header?: ReactNode
   footer?: ReactNode
+  overlay?: ReactNode
   children: ReactNode
   className?: string
 }
 
 export const MobileFrame = forwardRef<HTMLDivElement, MobileFrameProps>(function MobileFrame(
-  { header, footer, children, className },
+  { header, footer, overlay, children, className },
   ref,
 ) {
   return (
-    <div className="fixed inset-0 flex justify-center overflow-hidden bg-background sm:p-6">
+    <div className="fixed inset-0 flex justify-center overflow-hidden bg-background">
       <div
         className={cn(
-          'relative z-10 flex h-full min-h-0 w-full max-w-[440px] flex-col overflow-hidden border border-border bg-background shadow-soft sm:rounded-3xl sm:shadow-pop',
+          'relative z-10 flex h-full min-h-0 w-full max-w-[440px] flex-col overflow-hidden border-x border-border bg-background shadow-soft',
           className,
         )}
       >
@@ -30,6 +31,7 @@ export const MobileFrame = forwardRef<HTMLDivElement, MobileFrameProps>(function
           {children}
         </div>
         {footer}
+        {overlay}
       </div>
     </div>
   )

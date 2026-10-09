@@ -1,24 +1,14 @@
 import { useState } from 'react'
-import {
-  AlertTriangle,
-  Bus,
-  Camera,
-  Car,
-  CloudSun,
-  Map as MapIcon,
-  MapPin,
-  Phone,
-  Play,
-  User,
-} from 'lucide-react'
+import { AlertTriangle, Map as MapIcon, Phone, Play } from 'lucide-react'
 import { ActionButton } from '../components/ActionButton'
 import { AppHeader } from '../components/AppHeader'
 import { BottomTabBar } from '../components/BottomTabBar'
 import type { TabItem } from '../components/BottomTabBar'
 import { DayCover } from '../components/DayCover'
+import { DayDetails } from '../components/DayDetails'
 import { MobileFrame } from '../components/MobileFrame'
 import { RatingPanel } from '../components/RatingPanel'
-import { Card, Divider, Eyebrow, KeyValue, NoteCard, Pill, Screen, SectionTitle } from '../components/primitives'
+import { Card, Eyebrow, NoteCard, Pill, Screen, SectionTitle } from '../components/primitives'
 import { tripData } from '../data/trip'
 import { cn } from '../lib/cn'
 import type { CityBasics, Contact, TripDay } from '../types'
@@ -91,109 +81,7 @@ function DayDetail({
 }) {
   return (
     <Screen>
-      <Eyebrow>Today at a glance</Eyebrow>
-      <SectionTitle className="mt-1">{day.summary}</SectionTitle>
-
-      <Card className="go-float-in go-stagger-2 mt-4">
-        <KeyValue label="Staying" value={day.stay} />
-        <Divider className="my-1" />
-        <KeyValue label="Day starts" value={`${day.dayStart} — ${day.dayEnd}`} />
-        <Divider className="my-1" />
-        <KeyValue label="Planned activities" value={`${day.plannedHours} hrs`} />
-        <Divider className="my-1" />
-        <KeyValue label="Free from" value={day.freeFrom} />
-        <Divider className="my-1" />
-        <KeyValue label="Pickup / Drop" value={`${day.pickup} / ${day.drop}`} />
-      </Card>
-
-      <div className="mt-6">
-        <Eyebrow>Who&rsquo;s looking after you</Eyebrow>
-        <div className="mt-3 space-y-2.5">
-          <Card className="go-float-in go-stagger-3 flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-full border border-border bg-muted/50">
-              <User className="size-4 text-primary" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-semibold text-foreground">{day.coordinator.name}</div>
-              <div className="text-[11px] text-muted-foreground">{day.coordinator.role}</div>
-            </div>
-            <a
-              href={`tel:${day.coordinator.phone.replace(/\s/g, '')}`}
-              className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-semibold transition-transform active:scale-95"
-            >
-              <Phone className="size-3.5" /> Call
-            </a>
-          </Card>
-
-          <Card className="go-float-in go-stagger-4">
-            <div className="flex items-center gap-2">
-              <Car className="size-4 text-primary" />
-              <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-primary">Your driver</span>
-            </div>
-            <div className="mt-3 flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-full border border-border bg-muted/50">
-                <User className="size-4 text-primary" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-semibold text-foreground">{day.driver.name}</div>
-                <div className="text-[11px] text-muted-foreground">
-                  Arrives {day.driver.arrival} · {day.driver.car}
-                </div>
-              </div>
-              <a
-                href={`tel:${day.driver.phone.replace(/\s/g, '')}`}
-                className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-semibold transition-transform active:scale-95"
-              >
-                <Phone className="size-3.5" /> Call
-              </a>
-            </div>
-            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Car number</span>
-              <span className="font-mono text-[14px] font-semibold tabular-nums text-foreground">{day.driver.carNumber}</span>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {day.photoSpots.length > 0 ? (
-        <div className="mt-6">
-          <div className="flex items-center gap-2">
-            <Camera className="size-4 text-primary" />
-            <Eyebrow>Photo spots today</Eyebrow>
-          </div>
-          <div className="no-scrollbar mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1">
-            {day.photoSpots.map((spot) => (
-              <div key={spot.name} className="w-40 shrink-0 snap-center overflow-hidden rounded-2xl border border-border bg-surface shadow-soft">
-                <img src={spot.image} alt={spot.name} className="h-24 w-full object-cover" />
-                <div className="flex items-center gap-1 px-2.5 py-2 text-[11px] font-semibold text-foreground">
-                  <MapPin className="size-3 shrink-0 text-primary" />
-                  <span className="truncate">{spot.name}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="mt-6">
-        <Eyebrow>Weather briefing</Eyebrow>
-        <Card className="go-float-in mt-3 flex items-center gap-3">
-          <CloudSun className="size-8 text-primary" />
-          <div>
-            <div className="font-mono text-[18px] font-semibold tabular-nums text-foreground">{day.weather.temp}</div>
-            <div className="text-[12px] text-muted-foreground">{day.weather.note}</div>
-          </div>
-        </Card>
-      </div>
-
-      {day.transit ? (
-        <NoteCard tone="warning" className="mt-6">
-          <div className="flex items-center gap-2 font-semibold">
-            <Bus className="size-4" /> Transit via {day.transit.city}
-          </div>
-          <p className="mt-1 text-[12px] text-muted-foreground">{day.transit.note}</p>
-        </NoteCard>
-      ) : null}
+      <DayDetails day={day} />
 
       <div className="mt-6">
         <RatingPanel context={`Day ${day.n} in ${day.place}`} />

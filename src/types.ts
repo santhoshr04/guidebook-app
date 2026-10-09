@@ -55,6 +55,12 @@ export interface Transit {
   note: string
 }
 
+export interface Meal {
+  label: string
+  detail: string
+  included: boolean
+}
+
 export interface TripDay {
   n: number
   date: number
@@ -70,6 +76,11 @@ export interface TripDay {
   freeFrom: string
   coordinator: Person
   driver: Driver
+  meetingPoint: string
+  meals: Meal[]
+  inclusions: string[]
+  carry: string[]
+  notes: string[]
   photoSpots: PhotoSpot[]
   weather: Weather
   transit: Transit | null

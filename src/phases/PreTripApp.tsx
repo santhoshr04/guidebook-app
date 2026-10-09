@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Plane } from 'lucide-react'
+import { Check, ChevronRight, Plane } from 'lucide-react'
 import { ActionButton } from '../components/ActionButton'
 import { AppHeader } from '../components/AppHeader'
+import { BackButton } from '../components/BackButton'
+import { DayDetails } from '../components/DayDetails'
 import { MobileFrame } from '../components/MobileFrame'
 import { Card, Divider, Eyebrow, KeyValue, NoteCard, Pill, Screen, SectionTitle } from '../components/primitives'
 import { tripData } from '../data/trip'
 import { useCountdown } from '../hooks/useCountdown'
 import { cn } from '../lib/cn'
 import { formatClock, formatDate } from '../lib/format'
+import type { TripDay } from '../types'
 
 const STEPS = ['cover', 'countdown', 'flight', 'baggage', 'packing', 'places'] as const
 type Step = (typeof STEPS)[number]
@@ -38,6 +41,7 @@ interface PreTripAppProps {
 
 export function PreTripApp({ onExit }: PreTripAppProps) {
   const [index, setIndex] = useState(0)
+  const [previewDay, setPreviewDay] = useState<TripDay | null>(null)
   const step = STEPS[index]
   const isLast = index === STEPS.length - 1
 
@@ -70,13 +74,17 @@ export function PreTripApp({ onExit }: PreTripAppProps) {
   )
 
   return (
-    <MobileFrame header={header} footer={footer}>
+    <MobileFrame
+      header={header}
+      footer={footer}
+      overlay={previewDay ? <DayPreview day={previewDay} onClose={() => setPreviewDay(null)} /> : null}
+    >
       {step === 'cover' ? <CoverStep /> : null}
       {step === 'countdown' ? <CountdownStep /> : null}
       {step === 'flight' ? <FlightStep /> : null}
       {step === 'baggage' ? <BaggageStep /> : null}
       {step === 'packing' ? <PackingStep /> : null}
-      {step === 'places' ? <PlacesStep /> : null}
+      {step === 'places' ? <PlacesStep onPreview={setPreviewDay} /> : null}
     </MobileFrame>
   )
 }
@@ -306,30 +314,60 @@ function PackingStep() {
   )
 }
 
-function PlacesStep() {
+function PlacesStep({ onPreview }: { onPreview: (day: TripDay) => void }) {
   const { days } = tripData
   return (
     <Screen>
       <Eyebrow>Where you are going</Eyebrow>
       <SectionTitle className="mt-1">Places on your itinerary</SectionTitle>
+      <p className="mt-2 text-[12px] text-muted-foreground">Tap any day to preview the full plan.</p>
 
       <div className="mt-5 space-y-4">
         {days.map((day, i) => (
-          <div
+          <button
             key={day.n}
-            className={cn('go-float-in relative h-44 overflow-hidden rounded-2xl border border-border shadow-soft', `go-stagger-${Math.min(i + 2, 8)}`)}
+            type="button"
+            onClick={() => onPreview(day)}
+            className={cn(
+              'go-float-in relative block h-44 w-full overflow-hidden rounded-2xl border border-border text-left shadow-soft transition-transform active:scale-[0.99]',
+              `go-stagger-${Math.min(i + 2, 8)}`,
+            )}
           >
             <img src={day.coverImage} alt={day.place} className="size-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+            <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground shadow-soft">
+              Preview <ChevronRight className="size-3" />
+            </span>
             <div className="absolute bottom-3 left-4 text-white">
               <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/85">
                 Day {day.n} · {formatDate(day.date)}
               </div>
               <div className="font-display text-[22px] font-semibold tracking-tight">{day.place}</div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </Screen>
+  )
+}
+
+function DayPreview({ day, onClose }: { day: TripDay; onClose: () => void }) {
+  return (
+    <div className="go-detail-enter absolute inset-0 z-30 flex flex-col bg-background">
+      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-surface px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-soft">
+        <BackButton onClick={onClose} />
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+            Day {day.n} · {formatDate(day.date)}
+          </p>
+          <p className="truncate font-display text-[15px] font-semibold tracking-tight text-foreground">{day.place}</p>
+        </div>
+      </div>
+      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
+        <div className="min-h-full px-5 pt-6 pb-[calc(env(safe-area-inset-bottom)+3rem)]">
+          <DayDetails day={day} />
+        </div>
+      </div>
+    </div>
   )
 }
