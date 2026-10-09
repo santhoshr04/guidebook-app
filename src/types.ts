@@ -1,28 +1,66 @@
 export type Phase = 'entry' | 'pre_trip' | 'on_trip' | 'post_trip'
 
+export interface Airline {
+  code: string
+  name: string
+  color: string
+}
+
 export interface Airport {
   city: string
   code: string
   terminal: string
+  flag: string
 }
 
 export interface Flight {
-  airline: string
+  airline: Airline
   flightNumber: string
   departTime: number
-  reportBy: number
   from: Airport
   to: Airport
+  reportBy?: number
+  durationHrs?: number
 }
 
 export interface Baggage {
   checkInPerPax: number
   cabinPerPax: number
+  policyNote: string
 }
 
 export interface PackingGroup {
   group: string
   items: string[]
+}
+
+export interface DocumentItem {
+  name: string
+  category: string
+  detail: string
+}
+
+export interface ConnectivityOption {
+  name: string
+  price: string
+  note: string
+  recommended?: boolean
+}
+
+export interface Connectivity {
+  headline: string
+  summary: string
+  options: ConnectivityOption[]
+  roamingNote: string
+}
+
+export interface Accommodation {
+  name: string
+  place: string
+  checkIn: string
+  checkOut: string
+  phone: string
+  address: string
 }
 
 export interface Person {
@@ -48,6 +86,7 @@ export interface Weather {
   icon: string
   temp: string
   note: string
+  carryTips: string[]
 }
 
 export interface Transit {
@@ -59,6 +98,26 @@ export interface Meal {
   label: string
   detail: string
   included: boolean
+  mustTry?: string[]
+  onYourOwn?: boolean
+}
+
+export interface Activity {
+  time: string
+  title: string
+  durationHrs: number
+}
+
+export interface Ticket {
+  name: string
+  kind: string
+  detail: string
+}
+
+export interface MapMarker {
+  name: string
+  lat: number
+  lng: number
 }
 
 export interface TripDay {
@@ -78,8 +137,12 @@ export interface TripDay {
   driver: Driver
   meetingPoint: string
   meals: Meal[]
+  activities: Activity[]
+  tickets: Ticket[]
+  mapMarkers: MapMarker[]
   inclusions: string[]
   carry: string[]
+  bringExtra: string[]
   notes: string[]
   photoSpots: PhotoSpot[]
   weather: Weather
@@ -101,6 +164,16 @@ export interface CityBasics {
   city: string
   phrases: Phrase[]
   facts: string[]
+}
+
+export interface QuickRef {
+  mustTryFood: string[]
+  mustTryDrinks: string[]
+}
+
+export interface SupportFaq {
+  question: string
+  answer: string
 }
 
 export interface StorytellingCircle {
@@ -131,11 +204,16 @@ export interface Trip {
 
 export interface TripData {
   trip: Trip
-  flight: Flight
+  flights: Flight[]
   baggage: Baggage
   packing: PackingGroup[]
+  documents: DocumentItem[]
+  connectivity: Connectivity
+  accommodations: Accommodation[]
   days: TripDay[]
   contacts: Contact[]
   cityBasics: CityBasics
+  quickRef: QuickRef
+  supportFaqs: SupportFaq[]
   postTrip: PostTrip
 }

@@ -15,7 +15,9 @@ function App() {
     <>
       {!online ? <OfflineBanner /> : null}
       {phase === 'entry' ? <StatePicker onSelect={setPhase} /> : null}
-      {phase === 'pre_trip' ? <PreTripApp onExit={() => setPhase('entry')} /> : null}
+      {phase === 'pre_trip' ? (
+        <PreTripApp onExit={() => setPhase('entry')} onStartTrip={() => setPhase('on_trip')} />
+      ) : null}
       {phase === 'on_trip' ? <InTripApp onExit={() => setPhase('entry')} /> : null}
       {phase === 'post_trip' ? <PostTripApp onExit={() => setPhase('entry')} /> : null}
     </>

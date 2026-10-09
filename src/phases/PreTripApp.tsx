@@ -1,256 +1,141 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, ChevronRight, Plane } from 'lucide-react'
+import { Check, Download, FileText, Home, Luggage, Plane, Wifi } from 'lucide-react'
 import { ActionButton } from '../components/ActionButton'
 import { AppHeader } from '../components/AppHeader'
-import { BackButton } from '../components/BackButton'
-import { DayDetails } from '../components/DayDetails'
+import { BottomTabBar } from '../components/BottomTabBar'
+import type { TabItem } from '../components/BottomTabBar'
+import { FlightBoard } from '../components/FlightBoard'
 import { MobileFrame } from '../components/MobileFrame'
 import { Card, Divider, Eyebrow, KeyValue, NoteCard, Pill, Screen, SectionTitle } from '../components/primitives'
 import { tripData } from '../data/trip'
 import { useCountdown } from '../hooks/useCountdown'
 import { cn } from '../lib/cn'
 import { formatClock, formatDate } from '../lib/format'
-import type { TripDay } from '../types'
+import { downloadPdf, wrapText } from '../lib/pdf'
 
-const STEPS = ['cover', 'countdown', 'flight', 'baggage', 'packing', 'places'] as const
-type Step = (typeof STEPS)[number]
-
-const LABELS: Record<Step, string> = {
-  cover: 'Overview',
-  countdown: 'Countdown',
-  flight: 'Flight',
-  baggage: 'Baggage',
-  packing: 'Packing',
-  places: 'Places',
-}
-
-const CTA: Record<Step, string> = {
-  cover: 'Start planning',
-  countdown: 'Flight details',
-  flight: 'Baggage allowance',
-  baggage: 'Packing checklist',
-  packing: 'Where you are going',
-  places: 'Back to states',
-}
+const TABS: TabItem[] = [
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'packing', label: 'Packing', icon: Luggage },
+  { id: 'documents', label: 'Docs', icon: FileText },
+  { id: 'connectivity', label: 'Connect', icon: Wifi },
+]
 
 const PACKING_KEY = 'locotrails-packing-v1'
 
 interface PreTripAppProps {
   onExit: () => void
+  onStartTrip: () => void
 }
 
-export function PreTripApp({ onExit }: PreTripAppProps) {
-  const [index, setIndex] = useState(0)
-  const [previewDay, setPreviewDay] = useState<TripDay | null>(null)
-  const step = STEPS[index]
-  const isLast = index === STEPS.length - 1
-
-  function next() {
-    if (isLast) onExit()
-    else setIndex((value) => value + 1)
-  }
-
-  function back() {
-    if (index === 0) onExit()
-    else setIndex((value) => value - 1)
-  }
-
-  const header = (
-    <AppHeader
-      title={tripData.trip.title}
-      label={`Pre-Trip · ${LABELS[step]}`}
-      pageLabel={`${index + 1}/${STEPS.length}`}
-      progress={(index + 1) / STEPS.length}
-      onBack={back}
-    />
-  )
-
-  const footer = (
-    <div className="z-20 shrink-0 border-t border-border bg-surface px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-soft">
-      <ActionButton onClick={next} pulse={index === 0} icon={<Plane className="size-4" />}>
-        {CTA[step]}
-      </ActionButton>
-    </div>
-  )
+export function PreTripApp({ onExit, onStartTrip }: PreTripAppProps) {
+  const [tab, setTab] = useState('home')
+  const activeLabel = TABS.find((item) => item.id === tab)?.label ?? ''
 
   return (
     <MobileFrame
-      header={header}
-      footer={footer}
-      overlay={previewDay ? <DayPreview day={previewDay} onClose={() => setPreviewDay(null)} /> : null}
+      header={
+        <AppHeader
+          title={tripData.trip.title}
+          label={`Pre-Trip · ${activeLabel}`}
+          onBack={onExit}
+        />
+      }
+      footer={<BottomTabBar tabs={TABS} active={tab} onChange={setTab} />}
     >
-      {step === 'cover' ? <CoverStep /> : null}
-      {step === 'countdown' ? <CountdownStep /> : null}
-      {step === 'flight' ? <FlightStep /> : null}
-      {step === 'baggage' ? <BaggageStep /> : null}
-      {step === 'packing' ? <PackingStep /> : null}
-      {step === 'places' ? <PlacesStep onPreview={setPreviewDay} /> : null}
+      {tab === 'home' ? <HomeTab onStartTrip={onStartTrip} onGo={setTab} /> : null}
+      {tab === 'packing' ? <PackingTab /> : null}
+      {tab === 'documents' ? <DocumentsTab /> : null}
+      {tab === 'connectivity' ? <ConnectivityTab /> : null}
     </MobileFrame>
   )
 }
 
-function CoverStep() {
-  const { trip, days } = tripData
-  return (
-    <section className="relative flex min-h-full flex-col overflow-hidden">
-      <div
-        className="go-kenburns absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${days[0].coverImage})` }}
-        aria-hidden
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" aria-hidden />
-      <div className="relative flex flex-1 flex-col justify-end px-5 pt-10 pb-6 text-white">
-        <p className="go-float-in go-stagger-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85">
-          {trip.destination} · {trip.travellers} travellers
-        </p>
-        <h1 className="go-float-in go-stagger-3 mt-2 font-display text-[38px] leading-[1.03] font-semibold tracking-tight">
-          {trip.title}
-        </h1>
-        <p className="go-float-in go-stagger-4 mt-2 max-w-[34ch] text-[13px] leading-relaxed text-white/90">
-          Everything you need before you fly — countdown, flight, baggage and packing, all in one place.
-        </p>
-        <div className="go-float-in go-stagger-5 mt-4 flex flex-wrap gap-2">
-          {days.slice(0, 4).map((day) => (
-            <span key={day.n} className="rounded-full border border-white/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/90">
-              {day.place}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function CountdownStep() {
-  const { trip, flight } = tripData
+function HomeTab({ onStartTrip, onGo }: { onStartTrip: () => void; onGo: (tab: string) => void }) {
+  const { trip, flights, days } = tripData
   const countdown = useCountdown(trip.startDate)
+  const nextFlight = flights[0]
 
   return (
     <Screen>
-      <Eyebrow>Countdown</Eyebrow>
-      <SectionTitle className="mt-1">
-        {countdown.isPast ? 'Trip time!' : countdown.isUnder24h ? 'Travel tomorrow' : 'Until you fly'}
-      </SectionTitle>
-
-      <Card className="go-float-in go-stagger-2 mt-5 py-8 text-center">
-        <div className="flex items-baseline justify-center gap-4 font-mono tabular-nums">
-          <div>
-            <div className="text-[56px] font-semibold leading-none text-primary">{countdown.days}</div>
-            <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Days</div>
-          </div>
-          <div className="text-[32px] leading-none text-border">:</div>
-          <div>
-            <div className="text-[56px] font-semibold leading-none text-primary">{countdown.hours}</div>
-            <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Hours</div>
-          </div>
+      <div className="go-float-in relative -mx-5 -mt-6 mb-5 h-44 overflow-hidden">
+        <img src={days[0].coverImage} alt={trip.destination} className="go-kenburns size-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10" />
+        <div className="absolute bottom-4 left-5 right-5 text-white">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85">
+            {trip.destination} · {trip.travellers} travellers
+          </p>
+          <h1 className="mt-1 font-display text-[26px] font-semibold leading-tight tracking-tight">{trip.title}</h1>
         </div>
-      </Card>
-
-      <NoteCard tone={countdown.isUnder24h ? 'warning' : 'info'} className="go-float-in go-stagger-3 mt-4">
-        {countdown.isUnder24h ? (
-          <>
-            <strong>Your flight is coming up.</strong> Be at the airport by{' '}
-            {formatClock(flight.reportBy)} and keep your passport and boarding pass handy.
-          </>
-        ) : (
-          <>
-            Countdown shows <strong>days and hours only</strong>. Flight details unlock closer to departure —
-            in the meantime, finish your packing.
-          </>
-        )}
-      </NoteCard>
-
-      <Divider className="my-5" />
-      <p className="text-[12px] text-muted-foreground">
-        Departure {formatDate(flight.departTime)} at {formatClock(flight.departTime)} · {flight.airline}{' '}
-        {flight.flightNumber}
-      </p>
-    </Screen>
-  )
-}
-
-function FlightStep() {
-  const { flight } = tripData
-  return (
-    <Screen>
-      <Eyebrow>Flight</Eyebrow>
-      <SectionTitle className="mt-1">Your flight to {flight.to.city}</SectionTitle>
-
-      <Card className="go-float-in go-stagger-2 mt-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
-            <Plane className="size-4 text-primary" />
-            {flight.airline}
-          </div>
-          <Pill>{flight.flightNumber}</Pill>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <div>
-            <div className="font-mono text-[24px] font-semibold tabular-nums text-foreground">{flight.from.code}</div>
-            <div className="text-[11px] text-muted-foreground">{flight.from.city}</div>
-          </div>
-          <div className="flex-1 border-t border-dashed border-border" />
-          <Plane className="size-4 text-muted-foreground" />
-          <div className="flex-1 border-t border-dashed border-border" />
-          <div className="text-right">
-            <div className="font-mono text-[24px] font-semibold tabular-nums text-foreground">{flight.to.code}</div>
-            <div className="text-[11px] text-muted-foreground">{flight.to.city}</div>
-          </div>
-        </div>
-
-        <Divider className="my-4" />
-        <KeyValue label="Take-off" value={`${formatDate(flight.departTime)}, ${formatClock(flight.departTime)}`} />
-        <KeyValue label="Report by" value={formatClock(flight.reportBy)} />
-        <KeyValue label="Terminal" value={`${flight.from.terminal} → ${flight.to.terminal}`} />
-      </Card>
-
-      <NoteCard tone="warning" className="go-float-in go-stagger-3 mt-4">
-        Be at the airport at least <strong>3 hours before take-off</strong> for an international departure.
-      </NoteCard>
-    </Screen>
-  )
-}
-
-function BaggageStep() {
-  const { baggage, trip } = tripData
-  const perPax = baggage.checkInPerPax + baggage.cabinPerPax
-  const total = perPax * trip.travellers
-
-  return (
-    <Screen>
-      <Eyebrow>Baggage allowance</Eyebrow>
-      <SectionTitle className="mt-1">Pack smart, leave room</SectionTitle>
-
-      <div className="go-float-in go-stagger-2 mt-5 grid grid-cols-2 gap-3">
-        <Card>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Check-in / pax</div>
-          <div className="mt-1 font-mono text-[28px] font-semibold tabular-nums text-foreground">{baggage.checkInPerPax} kg</div>
-        </Card>
-        <Card>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Cabin / pax</div>
-          <div className="mt-1 font-mono text-[28px] font-semibold tabular-nums text-foreground">{baggage.cabinPerPax} kg</div>
-        </Card>
       </div>
 
-      <Card className="go-float-in go-stagger-3 mt-3 border-l-4 border-l-primary">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-          {perPax} kg × {trip.travellers} travellers
+      <Card className="go-float-in go-stagger-2 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            {countdown.isPast ? 'Trip time' : 'Departs in'}
+          </p>
+          <p className="mt-1 font-mono text-[30px] font-semibold leading-none tabular-nums text-primary">
+            {countdown.days}d {countdown.hours}h
+          </p>
         </div>
-        <div className="mt-1 font-mono text-[40px] font-semibold leading-none tabular-nums text-primary">{total} kg</div>
-        <div className="mt-1 text-[12px] text-muted-foreground">total allowed across the group</div>
+        <div className="text-right text-[11px] text-muted-foreground">
+          <p className="font-semibold text-foreground">{formatDate(trip.startDate)}</p>
+          <p>
+            {nextFlight.airline.code} {nextFlight.flightNumber} · {formatClock(nextFlight.departTime)}
+          </p>
+        </div>
       </Card>
 
-      <NoteCard tone="success" className="go-float-in go-stagger-4 mt-4">
-        <strong>Only pack 60–70% now.</strong> You&rsquo;ll want the space for shopping on the way home — and
-        it makes the return trip far more comfortable.
-      </NoteCard>
+      <ActionButton className="go-float-in go-stagger-3 mt-3" pulse onClick={onStartTrip} icon={<Plane className="size-4" />}>
+        Start Trip
+      </ActionButton>
+      <p className="mt-2 text-center text-[11px] text-muted-foreground">
+        Starts the trip and opens the day-by-day guide.
+      </p>
+
+      <div className="mt-6">
+        <Eyebrow>Your flights</Eyebrow>
+        <div className="go-float-in mt-3">
+          <FlightBoard flights={flights} />
+        </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => onGo('packing')}
+          className="go-float-in flex flex-col items-start gap-1 rounded-2xl border border-border bg-surface p-4 text-left shadow-soft transition-transform active:scale-[0.98]"
+        >
+          <Luggage className="size-5 text-primary" />
+          <span className="mt-1 text-[13px] font-semibold text-foreground">Packing</span>
+          <span className="text-[11px] text-muted-foreground">What &amp; how much</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onGo('documents')}
+          className="go-float-in flex flex-col items-start gap-1 rounded-2xl border border-border bg-surface p-4 text-left shadow-soft transition-transform active:scale-[0.98]"
+        >
+          <FileText className="size-5 text-primary" />
+          <span className="mt-1 text-[13px] font-semibold text-foreground">Documents</span>
+          <span className="text-[11px] text-muted-foreground">Tickets &amp; visas</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onGo('connectivity')}
+          className="go-float-in col-span-2 flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left shadow-soft transition-transform active:scale-[0.98]"
+        >
+          <Wifi className="size-5 text-primary" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-semibold text-foreground">Connectivity</span>
+            <span className="text-[11px] text-muted-foreground">eSIM &amp; roaming — stay online from landing</span>
+          </span>
+        </button>
+      </div>
     </Screen>
   )
 }
 
-function PackingStep() {
-  const { packing } = tripData
+function PackingTab() {
+  const { packing, baggage, trip, flights } = tripData
   const [checked, setChecked] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(PACKING_KEY)
@@ -265,6 +150,8 @@ function PackingStep() {
   }, [checked])
 
   const total = useMemo(() => packing.reduce((sum, group) => sum + group.items.length, 0), [packing])
+  const perPax = baggage.checkInPerPax + baggage.cabinPerPax
+  const totalKg = perPax * trip.travellers
 
   function toggle(key: string) {
     setChecked((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]))
@@ -272,14 +159,14 @@ function PackingStep() {
 
   return (
     <Screen>
-      <Eyebrow>Packing checklist</Eyebrow>
+      <Eyebrow>What to pack</Eyebrow>
       <SectionTitle className="mt-1">
         {checked.length}/{total} packed
       </SectionTitle>
 
       <div className="mt-5 space-y-4">
-        {packing.map((group, groupIndex) => (
-          <Card key={group.group} className={cn('go-float-in', `go-stagger-${Math.min(groupIndex + 2, 8)}`)}>
+        {packing.map((group) => (
+          <Card key={group.group} className="go-float-in">
             <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-primary">{group.group}</p>
             <div className="mt-3 space-y-1">
               {group.items.map((item) => {
@@ -310,64 +197,146 @@ function PackingStep() {
           </Card>
         ))}
       </div>
+
+      <div className="mt-8">
+        <Eyebrow>How much to pack</Eyebrow>
+        <SectionTitle className="mt-1">Baggage allowance</SectionTitle>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Card className="go-float-in">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Check-in / pax</div>
+            <div className="mt-1 font-mono text-[28px] font-semibold tabular-nums text-foreground">
+              {baggage.checkInPerPax} kg
+            </div>
+          </Card>
+          <Card className="go-float-in">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Cabin / pax</div>
+            <div className="mt-1 font-mono text-[28px] font-semibold tabular-nums text-foreground">
+              {baggage.cabinPerPax} kg
+            </div>
+          </Card>
+        </div>
+
+        <Card className="go-float-in mt-3 border-l-4 border-l-primary">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            {perPax} kg × {trip.travellers} travellers · {flights[0].airline.name}
+          </div>
+          <div className="mt-1 font-mono text-[40px] font-semibold leading-none tabular-nums text-primary">
+            {totalKg} kg
+          </div>
+          <div className="mt-1 text-[12px] text-muted-foreground">total allowed across the group</div>
+        </Card>
+
+        <p className="mt-3 text-[11px] text-muted-foreground">{baggage.policyNote}</p>
+
+        <NoteCard tone="success" className="mt-4">
+          <strong>Only pack 60–70% now.</strong> Leave room for shopping on the way home — and it makes the
+          return trip far more comfortable.
+        </NoteCard>
+      </div>
     </Screen>
   )
 }
 
-function PlacesStep({ onPreview }: { onPreview: (day: TripDay) => void }) {
-  const { days } = tripData
+function DocumentsTab() {
+  const { documents, trip } = tripData
+
+  function download(name: string, category: string, detail: string) {
+    const lines = [
+      `Trip: ${trip.title}`,
+      `Destination: ${trip.destination}`,
+      `Travellers: ${trip.travellers}`,
+      `Category: ${category}`,
+      '',
+      ...wrapText(detail),
+      '',
+      'Generated from the LocoTrails guidebook.',
+    ]
+    downloadPdf(`${name.replace(/[^\w]+/g, '-').toLowerCase()}.pdf`, name, lines)
+  }
+
   return (
     <Screen>
-      <Eyebrow>Where you are going</Eyebrow>
-      <SectionTitle className="mt-1">Places on your itinerary</SectionTitle>
-      <p className="mt-2 text-[12px] text-muted-foreground">Tap any day to preview the full plan.</p>
+      <Eyebrow>Documentation</Eyebrow>
+      <SectionTitle className="mt-1">Everything in one place</SectionTitle>
+      <p className="mt-2 text-[12px] text-muted-foreground">
+        Preview each document and download a PDF copy for offline use.
+      </p>
 
-      <div className="mt-5 space-y-4">
-        {days.map((day, i) => (
-          <button
-            key={day.n}
-            type="button"
-            onClick={() => onPreview(day)}
-            className={cn(
-              'go-float-in relative block h-44 w-full overflow-hidden rounded-2xl border border-border text-left shadow-soft transition-transform active:scale-[0.99]',
-              `go-stagger-${Math.min(i + 2, 8)}`,
-            )}
-          >
-            <img src={day.coverImage} alt={day.place} className="size-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-            <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground shadow-soft">
-              Preview <ChevronRight className="size-3" />
-            </span>
-            <div className="absolute bottom-3 left-4 text-white">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/85">
-                Day {day.n} · {formatDate(day.date)}
+      <div className="mt-5 space-y-3">
+        {documents.map((doc) => (
+          <Card key={doc.name} className="go-float-in">
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FileText className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <Pill>{doc.category}</Pill>
+                <div className="mt-2 text-[13px] font-semibold text-foreground">{doc.name}</div>
+                <p className="mt-1 text-[12px] text-muted-foreground">{doc.detail}</p>
               </div>
-              <div className="font-display text-[22px] font-semibold tracking-tight">{day.place}</div>
             </div>
-          </button>
+            <button
+              type="button"
+              onClick={() => download(doc.name, doc.category, doc.detail)}
+              className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface text-[12px] font-semibold text-foreground transition-transform active:scale-[0.98]"
+            >
+              <Download className="size-4 text-primary" /> Download PDF
+            </button>
+          </Card>
         ))}
       </div>
     </Screen>
   )
 }
 
-function DayPreview({ day, onClose }: { day: TripDay; onClose: () => void }) {
+function ConnectivityTab() {
+  const { connectivity } = tripData
+
   return (
-    <div className="go-detail-enter absolute inset-0 z-30 flex flex-col bg-background">
-      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-surface px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-soft">
-        <BackButton onClick={onClose} />
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-            Day {day.n} · {formatDate(day.date)}
-          </p>
-          <p className="truncate font-display text-[15px] font-semibold tracking-tight text-foreground">{day.place}</p>
-        </div>
+    <Screen>
+      <Eyebrow>Connectivity</Eyebrow>
+      <SectionTitle className="mt-1">{connectivity.headline}</SectionTitle>
+      <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{connectivity.summary}</p>
+
+      <NoteCard tone="info" className="mt-4">
+        <strong>Best plan:</strong> buy an eSIM from India, install it now, and switch it on the moment you
+        land — so you are online the second you touch down.
+      </NoteCard>
+
+      <div className="mt-5 space-y-3">
+        {connectivity.options.map((option) => (
+          <Card
+            key={option.name}
+            className={cn('go-float-in', option.recommended && 'border-l-4 border-l-primary')}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[13px] font-semibold text-foreground">{option.name}</div>
+                <p className="mt-1 text-[12px] text-muted-foreground">{option.note}</p>
+              </div>
+              {option.recommended ? <Pill className="shrink-0 border-primary text-primary">Recommended</Pill> : null}
+            </div>
+            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+              <span className="font-mono text-[15px] font-semibold tabular-nums text-foreground">{option.price}</span>
+              <button
+                type="button"
+                className="flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 text-[12px] font-semibold text-foreground transition-transform active:scale-95"
+              >
+                <Wifi className="size-3.5 text-primary" /> Get this
+              </button>
+            </div>
+          </Card>
+        ))}
       </div>
-      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
-        <div className="min-h-full px-5 pt-6 pb-[calc(env(safe-area-inset-bottom)+3rem)]">
-          <DayDetails day={day} />
-        </div>
-      </div>
-    </div>
+
+      <NoteCard tone="warning" className="mt-4">
+        {connectivity.roamingNote}
+      </NoteCard>
+
+      <Divider className="my-6" />
+      <KeyValue label="Arrival terminal" value="Hanoi (HAN) · T2" />
+      <KeyValue label="Local carriers" value="Viettel · Vinaphone · Mobifone" />
+    </Screen>
   )
 }

@@ -16,19 +16,43 @@ export const tripData: TripData = {
     destination: 'Vietnam',
     homeCity: 'Chennai',
     startDate: start,
-    endDate: start + 6 * DAY,
+    endDate: start + 3 * DAY + 16 * HOUR,
     travellers: 4,
     brand: { name: 'LocoTrails' },
   },
-  flight: {
-    airline: 'IndiGo',
-    flightNumber: '6E 1049',
-    departTime: start,
-    reportBy: start - 3 * HOUR,
-    from: { city: 'Chennai', code: 'MAA', terminal: 'T2' },
-    to: { city: 'Hanoi', code: 'HAN', terminal: 'T2' },
+  flights: [
+    {
+      airline: { code: '6E', name: 'IndiGo', color: '#2b2fa8' },
+      flightNumber: '1049',
+      departTime: start,
+      reportBy: start - 3 * HOUR,
+      durationHrs: 3.5,
+      from: { city: 'Chennai', code: 'MAA', terminal: 'T2', flag: '🇮🇳' },
+      to: { city: 'Bangkok', code: 'BKK', terminal: 'T1', flag: '🇹🇭' },
+    },
+    {
+      airline: { code: '6E', name: 'IndiGo', color: '#2b2fa8' },
+      flightNumber: '1049',
+      departTime: start + 5 * HOUR,
+      durationHrs: 2,
+      from: { city: 'Bangkok', code: 'BKK', terminal: 'T1', flag: '🇹🇭' },
+      to: { city: 'Hanoi', code: 'HAN', terminal: 'T2', flag: '🇻🇳' },
+    },
+    {
+      airline: { code: '6E', name: 'IndiGo', color: '#2b2fa8' },
+      flightNumber: '1050',
+      departTime: start + 3 * DAY + 14 * HOUR,
+      reportBy: start + 3 * DAY + 11 * HOUR,
+      durationHrs: 6,
+      from: { city: 'Hanoi', code: 'HAN', terminal: 'T2', flag: '🇻🇳' },
+      to: { city: 'Chennai', code: 'MAA', terminal: 'T2', flag: '🇮🇳' },
+    },
+  ],
+  baggage: {
+    checkInPerPax: 20,
+    cabinPerPax: 7,
+    policyNote: 'IndiGo international allowance: 20 kg check-in + 7 kg cabin per traveller.',
   },
-  baggage: { checkInPerPax: 20, cabinPerPax: 7 },
   packing: [
     {
       group: 'Documents & Money',
@@ -47,12 +71,100 @@ export const tripData: TripData = {
       items: ['Prescription medicines', 'Fever / pain medicine', 'Basic first-aid', 'Insect repellent', 'Sunscreen'],
     },
     {
+      group: 'Beach & Swim',
+      items: ['Swimwear', 'Quick-dry towel', 'Waterproof phone pouch', 'Flip-flops', 'Sun hat'],
+    },
+    {
       group: 'Child Kit',
       items: ['Child medicines', 'Wet wipes', 'Favourite snacks', 'Small toy / activity', 'Comfort item'],
     },
+  ],
+  documents: [
     {
-      group: 'Day Bag',
-      items: ['Reusable water bottles', 'Wet wipes / tissues', 'Hand sanitizer', 'Compact umbrella'],
+      name: 'Flight e-ticket · 6E 1049 / 6E 1050',
+      category: 'Booking',
+      detail: 'Chennai → Hanoi (via Bangkok) and return. PNR: LT7X2Q. 4 travellers, 20 kg + 7 kg each.',
+    },
+    {
+      name: 'Vietnam e-visa',
+      category: 'Visa',
+      detail: 'Approved e-visa valid 30 days. Entry at Hanoi (HAN). Carry a printed copy.',
+    },
+    {
+      name: 'Hanoi La Siesta — stay confirmation',
+      category: 'Stay',
+      detail: 'Old Quarter, Hanoi. Check-in 14:00, check-out 12:00. Confirmation LT-HL-2291.',
+    },
+    {
+      name: 'Halong Bay cruise voucher',
+      category: 'Stay',
+      detail: 'Overnight cruise, Day 2. Boarding at 07:30. Voucher LT-HB-0087.',
+    },
+    {
+      name: 'Travel insurance',
+      category: 'Insurance',
+      detail: 'Family plan covering all 4 travellers. Policy LT-INS-556231. 24×7 assistance included.',
+    },
+    {
+      name: 'Airport transfer vouchers',
+      category: 'Transfer',
+      detail: 'Hanoi airport pickup and all inter-city transfers. Show voucher to the driver.',
+    },
+  ],
+  connectivity: {
+    headline: 'Get connected before you land',
+    summary:
+      'Stay online from the moment you touch down. Buy an eSIM from India and activate it on landing, or enable international roaming before you fly.',
+    options: [
+      {
+        name: 'Airalo eSIM · Vietnam',
+        price: 'from ₹899',
+        note: 'Buy in India, install now, activate on landing. Best value.',
+        recommended: true,
+      },
+      {
+        name: 'Nomad eSIM · Vietnam',
+        price: 'from ₹1,050',
+        note: 'Instant QR activation. Good if you forget to set it up early.',
+      },
+      {
+        name: 'Viettel SIM · HAN airport',
+        price: 'from ₹500',
+        note: 'Cheaper, but you are offline until you buy it after landing.',
+      },
+      {
+        name: 'Airtel / Jio international roaming',
+        price: 'from ₹649/day',
+        note: 'Keep your own number. Activate a pack before departure.',
+      },
+    ],
+    roamingNote:
+      'Turn on data roaming only after activating your eSIM or roaming pack, and switch off “Data Roaming” for your primary SIM to avoid charges.',
+  },
+  accommodations: [
+    {
+      name: 'Hanoi La Siesta, Old Quarter',
+      place: 'Hanoi · Days 1 & 4',
+      checkIn: '14:00',
+      checkOut: '12:00',
+      phone: '+84 24 3929 0000',
+      address: '94 Ma May St, Hoan Kiem, Hanoi',
+    },
+    {
+      name: 'Overnight cruise, Halong Bay',
+      place: 'Halong Bay · Day 2',
+      checkIn: '12:30',
+      checkOut: '10:00',
+      phone: '+84 900 000 111',
+      address: 'Tuan Chau Marina, Halong',
+    },
+    {
+      name: 'Tam Coc Garden Resort',
+      place: 'Ninh Binh · Day 3',
+      checkIn: '14:00',
+      checkOut: '11:00',
+      phone: '+84 900 000 222',
+      address: 'Hai Nham, Hoa Lu, Ninh Binh',
     },
   ],
   days: [
@@ -71,25 +183,46 @@ export const tripData: TripData = {
       freeFrom: '19:30',
       coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
       driver: { name: 'Mr. Hung', phone: '+84 912 345 678', arrival: '14:15', car: 'Toyota Innova', carNumber: '29A-123.45' },
+      meetingPoint: 'Hanoi La Siesta lobby, Old Quarter',
+      activities: [
+        { time: '14:30', title: 'Airport pickup & hotel transfer', durationHrs: 1 },
+        { time: '16:30', title: 'Guided Old Quarter walk', durationHrs: 2 },
+        { time: '19:00', title: 'Welcome dinner', durationHrs: 1.5 },
+      ],
+      tickets: [
+        { name: 'Airport transfer voucher', kind: 'Transfer', detail: 'Show at the arrivals gate. Driver Mr. Hung, car 29A-123.45.' },
+        { name: 'Old Quarter guided walk', kind: 'Activity', detail: 'Guide meets you in the hotel lobby at 16:30.' },
+      ],
+      mapMarkers: [
+        { name: 'Hanoi La Siesta', lat: 21.0335, lng: 105.8531 },
+        { name: 'Hoan Kiem Lake', lat: 21.0287, lng: 105.8524 },
+        { name: 'St Joseph Cathedral', lat: 21.0286, lng: 105.8489 },
+      ],
+      meals: [
+        { label: 'Breakfast', detail: 'In flight / on arrival', included: false, onYourOwn: true },
+        {
+          label: 'Lunch',
+          detail: 'On your own near the hotel',
+          included: false,
+          onYourOwn: true,
+          mustTry: ['Banh mi from a street cart', 'Bun cha'],
+        },
+        { label: 'Dinner', detail: 'Welcome dinner in the Old Quarter', included: true },
+      ],
+      inclusions: ['Airport pickup & transfer', 'Hotel check-in assistance', 'Old Quarter guided walk', 'Welcome dinner'],
+      carry: ['Passport & visa', 'Light layer for the flight', 'Comfortable walking shoes', 'Rain cover'],
+      bringExtra: [],
+      notes: [
+        'Keep 30 minutes after landing for immigration',
+        'Local SIM cards and eSIM kiosks are available at the airport',
+        'Hotel check-in opens at 14:00',
+      ],
       photoSpots: [
         { name: 'Hoan Kiem Lake', image: thumb('hoan-kiem') },
         { name: 'St Joseph Cathedral', image: thumb('st-joseph') },
         { name: 'Train Street', image: thumb('train-street') },
       ],
-      meetingPoint: 'Hanoi La Siesta lobby, Old Quarter',
-      meals: [
-        { label: 'Breakfast', detail: 'In flight / on arrival', included: false },
-        { label: 'Lunch', detail: 'On your own near the hotel', included: false },
-        { label: 'Dinner', detail: 'Welcome dinner in the Old Quarter', included: true },
-      ],
-      inclusions: ['Airport pickup & transfer', 'Hotel check-in assistance', 'Old Quarter guided walk', 'Welcome dinner'],
-      carry: ['Passport & visa', 'Light layer for the flight', 'Comfortable walking shoes', 'Rain cover'],
-      notes: [
-        'Keep 30 minutes after landing for immigration',
-        'Local SIM cards are available at the airport',
-        'Hotel check-in opens at 14:00',
-      ],
-      weather: { icon: 'cloud-sun', temp: '24–30°C', note: 'Humid with a chance of short showers' },
+      weather: { icon: 'cloud-sun', temp: '24–30°C', note: 'Humid with a chance of short showers', carryTips: ['Carry an umbrella — short showers likely'] },
       transit: { city: 'Bangkok (BKK)', note: '3h layover — keep boarding passes handy and check the gate on screens' },
     },
     {
@@ -107,25 +240,46 @@ export const tripData: TripData = {
       freeFrom: '18:30',
       coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
       driver: { name: 'Mr. Tuan', phone: '+84 987 654 321', arrival: '07:00', car: 'Ford Transit', carNumber: '14A-556.78' },
-      photoSpots: [
-        { name: 'Sung Sot Cave', image: thumb('sung-sot') },
-        { name: 'Ti Top Island', image: thumb('ti-top') },
-        { name: 'Sunset on the sundeck', image: thumb('sundeck') },
-      ],
       meetingPoint: 'Hotel lobby, 07:15',
+      activities: [
+        { time: '07:30', title: 'Transfer to Halong Bay', durationHrs: 3 },
+        { time: '12:00', title: 'Cruise & kayaking', durationHrs: 3 },
+        { time: '15:00', title: 'Sung Sot cave visit', durationHrs: 1 },
+        { time: '17:30', title: 'Sunset on the sundeck', durationHrs: 1 },
+      ],
+      tickets: [
+        { name: 'Halong cruise boarding pass', kind: 'Activity', detail: 'Board at Tuan Chau Marina, 07:30 sharp.' },
+        { name: 'Kayaking ticket', kind: 'Activity', detail: 'Life jackets provided onboard.' },
+      ],
+      mapMarkers: [
+        { name: 'Tuan Chau Marina', lat: 20.9151, lng: 106.9864 },
+        { name: 'Sung Sot Cave', lat: 20.9051, lng: 107.0201 },
+        { name: 'Ti Top Island', lat: 20.8875, lng: 107.0764 },
+      ],
       meals: [
         { label: 'Breakfast', detail: 'At the hotel, 06:30', included: true },
-        { label: 'Lunch', detail: 'Onboard the cruise', included: true },
+        {
+          label: 'Lunch',
+          detail: 'Onboard the cruise',
+          included: true,
+          mustTry: ['Fresh grilled seafood', 'Halong spring rolls'],
+        },
         { label: 'Dinner', detail: 'Sunset dinner on the sundeck', included: true },
       ],
       inclusions: ['Return transfers', 'Overnight cruise cabin', 'Kayaking & cave entry', 'All meals onboard', 'English-speaking guide'],
       carry: ['Swimwear', 'Sun hat & sunscreen', 'Camera', 'Motion-sickness tablets', 'A small overnight bag'],
+      bringExtra: ['Extra set of clothes — you will get wet kayaking', 'Quick-dry towel', 'Waterproof pouch for your phone'],
       notes: [
         'Cruise check-in closes at 07:30 sharp',
         'Wi-Fi is limited once you are on the bay',
         'Leave large luggage on the coach — pack a small overnight bag',
       ],
-      weather: { icon: 'sun', temp: '25–31°C', note: 'Clear and bright — great for the bay' },
+      photoSpots: [
+        { name: 'Sung Sot Cave', image: thumb('sung-sot') },
+        { name: 'Ti Top Island', image: thumb('ti-top') },
+        { name: 'Sunset on the sundeck', image: thumb('sundeck') },
+      ],
+      weather: { icon: 'sun', temp: '25–31°C', note: 'Clear and bright — great for the bay', carryTips: ['Carry a hat — strong sun on the water', 'High-SPF sunscreen'] },
       transit: null,
     },
     {
@@ -143,24 +297,44 @@ export const tripData: TripData = {
       freeFrom: '17:30',
       coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
       driver: { name: 'Mr. Tuan', phone: '+84 987 654 321', arrival: '07:30', car: 'Ford Transit', carNumber: '14A-556.78' },
-      photoSpots: [
-        { name: 'Mua Cave viewpoint', image: thumb('mua-cave') },
-        { name: 'Trang An river', image: thumb('trang-an') },
-      ],
       meetingPoint: 'Hotel lobby, 07:45',
+      activities: [
+        { time: '09:00', title: 'Trang An boat ride', durationHrs: 2 },
+        { time: '12:00', title: 'Mua Cave viewpoint climb', durationHrs: 1.5 },
+        { time: '15:00', title: 'Village cycling', durationHrs: 1.5 },
+      ],
+      tickets: [
+        { name: 'Trang An boat ticket', kind: 'Activity', detail: 'Boats depart every 15 minutes from the dock.' },
+        { name: 'Mua Cave entry', kind: 'Activity', detail: 'Around 500 steps — take it slow.' },
+      ],
+      mapMarkers: [
+        { name: 'Trang An boat dock', lat: 20.252, lng: 105.913 },
+        { name: 'Mua Cave viewpoint', lat: 20.229, lng: 105.936 },
+        { name: 'Tam Coc Garden Resort', lat: 20.216, lng: 105.937 },
+      ],
       meals: [
         { label: 'Breakfast', detail: 'At the hotel, 07:00', included: true },
-        { label: 'Lunch', detail: 'Set menu near Tam Coc', included: true },
-        { label: 'Dinner', detail: 'On your own at the resort', included: false },
+        {
+          label: 'Lunch',
+          detail: 'Set menu near Tam Coc',
+          included: true,
+          mustTry: ['Ninh Binh goat meat', 'Crispy rice (com chay)'],
+        },
+        { label: 'Dinner', detail: 'At liberty — on your own at the resort', included: false, onYourOwn: true },
       ],
       inclusions: ['Return transfers', 'Trang An boat ride', 'Mua Cave entry', 'Cycling rental', 'Local guide'],
       carry: ['Sun hat & sunscreen', 'Shoes for the climb', 'Reusable water bottle', 'Insect repellent'],
+      bringExtra: ['Extra pair of socks — the boat ride may splash', 'A light jacket for the early morning'],
       notes: [
         'Mua Cave has around 500 steps — take it slow',
         'The boat ride is about 2 hours, bring a hat',
         'Carry small cash for local vendors',
       ],
-      weather: { icon: 'cloud-sun', temp: '23–29°C', note: 'Mild with light cloud cover' },
+      photoSpots: [
+        { name: 'Mua Cave viewpoint', image: thumb('mua-cave') },
+        { name: 'Trang An river', image: thumb('trang-an') },
+      ],
+      weather: { icon: 'cloud-sun', temp: '23–29°C', note: 'Mild with light cloud cover', carryTips: ['Carry a light jacket for the morning', 'Carry an umbrella — brief showers possible'] },
       transit: null,
     },
     {
@@ -178,24 +352,45 @@ export const tripData: TripData = {
       freeFrom: '15:00',
       coordinator: { name: 'Nandu', role: 'LocoTrails Ops', phone: '+91 90000 11111' },
       driver: { name: 'Mr. Hung', phone: '+84 912 345 678', arrival: '08:45', car: 'Toyota Innova', carNumber: '29A-123.45' },
-      photoSpots: [
-        { name: 'Dong Xuan Market', image: thumb('dong-xuan') },
-        { name: 'Cafe Giang', image: thumb('egg-coffee') },
-      ],
       meetingPoint: 'Hotel lobby, 09:00',
+      activities: [
+        { time: '09:30', title: 'Dong Xuan market walk', durationHrs: 1.5 },
+        { time: '14:00', title: 'Egg coffee at Cafe Giang', durationHrs: 1 },
+        { time: '16:30', title: 'Transfer to the airport', durationHrs: 1 },
+      ],
+      tickets: [
+        { name: 'Airport transfer voucher', kind: 'Transfer', detail: 'Depart hotel at 16:30 for HAN airport.' },
+        { name: 'Return flight 6E 1050', kind: 'Booking', detail: 'Check-in opens 3 hours before departure.' },
+      ],
+      mapMarkers: [
+        { name: 'Dong Xuan Market', lat: 21.036, lng: 105.85 },
+        { name: 'Cafe Giang', lat: 21.034, lng: 105.852 },
+        { name: 'HAN Airport', lat: 21.2212, lng: 105.8072 },
+      ],
       meals: [
         { label: 'Breakfast', detail: 'At the hotel, 08:00', included: true },
-        { label: 'Lunch', detail: 'Old Quarter street food, on your own', included: false },
-        { label: 'Dinner', detail: 'In flight / on return', included: false },
+        {
+          label: 'Lunch',
+          detail: 'At liberty — Old Quarter street food',
+          included: false,
+          onYourOwn: true,
+          mustTry: ['Pho', 'Banh cuon'],
+        },
+        { label: 'Dinner', detail: 'In flight / on return', included: false, onYourOwn: true },
       ],
       inclusions: ['Day rooms to freshen up', 'Old Quarter market walk', 'Airport transfer', 'Check-in assistance'],
       carry: ['Passport & boarding pass', 'Duty-free shopping list', 'Phone charger in cabin bag', 'Light layer for the flight'],
+      bringExtra: [],
       notes: [
         'Day rooms are available until 12:00',
         'Be at the airport 3 hours before departure',
         'Settle any hotel incidentals before you leave',
       ],
-      weather: { icon: 'cloud-sun', temp: '24–30°C', note: 'Warm and humid' },
+      photoSpots: [
+        { name: 'Dong Xuan Market', image: thumb('dong-xuan') },
+        { name: 'Cafe Giang', image: thumb('egg-coffee') },
+      ],
+      weather: { icon: 'cloud-sun', temp: '24–30°C', note: 'Warm and humid', carryTips: ['Carry an umbrella — humid with showers'] },
       transit: null,
     },
   ],
@@ -220,6 +415,47 @@ export const tripData: TripData = {
       'Motorbikes are the main way around — cross the road slowly and predictably.',
     ],
   },
+  quickRef: {
+    mustTryFood: ['Pho', 'Banh Mi', 'Cha Ca La Vong', 'Bun Cha'],
+    mustTryDrinks: ['Egg coffee', 'Vietnamese iced coffee', 'Bia Hoi'],
+  },
+  supportFaqs: [
+    {
+      question: "My driver hasn't arrived. What do I do?",
+      answer:
+        'Call your driver from the Today tab first. If you still need help, raise an issue here — a coordinator calls you within 2 minutes.',
+    },
+    {
+      question: 'Can I change today’s plan?',
+      answer:
+        'Often yes. Raise an issue or call your coordinator; changes depend on availability and any extra cost is confirmed before we proceed.',
+    },
+    {
+      question: 'The hotel room isn’t ready.',
+      answer:
+        'Speak to the front desk, then raise an issue so we can follow up with the hotel and arrange somewhere to freshen up.',
+    },
+    {
+      question: 'My flight is delayed or cancelled.',
+      answer:
+        'Call the airline and your coordinator right away. We will rearrange airport transfers and, if needed, the first night of your stay.',
+    },
+    {
+      question: 'I’m not feeling well.',
+      answer:
+        'For anything urgent, call the 24×7 helpline immediately. For minor issues the hotel can arrange a doctor — raise an issue and we’ll coordinate.',
+    },
+    {
+      question: 'What if I lose my passport?',
+      answer:
+        'Contact the 24×7 helpline immediately. We will help you with the police report and your embassy for an emergency travel document.',
+    },
+    {
+      question: 'A card didn’t work — where can I get cash?',
+      answer:
+        'ATMs are common in the cities on this trip. Carry some local cash for small vendors. If you’re stuck, raise an issue and we’ll guide you.',
+    },
+  ],
   postTrip: {
     storytellingCircle: {
       city: 'Chennai',
