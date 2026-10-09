@@ -3,7 +3,6 @@ import {
   Bus,
   Camera,
   Car,
-  Check,
   CloudSun,
   Info,
   MapPin,
@@ -17,6 +16,7 @@ import {
 import type { TripDay } from '../types'
 import { cn } from '../lib/cn'
 import { Card, Divider, Eyebrow, KeyValue, NoteCard, Pill, SectionTitle } from './primitives'
+import { ClockTime } from './ClockTime'
 import { RouteMap } from './RouteMap'
 
 function durationLabel(hours: number): string {
@@ -34,13 +34,31 @@ export function DayDetails({ day }: { day: TripDay }) {
       <Card className="go-float-in go-stagger-2 mt-4">
         <KeyValue label="Staying" value={day.stay} />
         <Divider className="my-1" />
-        <KeyValue label="Day starts" value={`${day.dayStart} — ${day.dayEnd}`} />
+        <KeyValue
+          label="Day starts"
+          value={
+            <span className="inline-flex flex-wrap items-center justify-end gap-x-1.5">
+              <ClockTime time={day.dayStart} />
+              <span className="text-muted-foreground">–</span>
+              <ClockTime time={day.dayEnd} />
+            </span>
+          }
+        />
         <Divider className="my-1" />
         <KeyValue label="Planned activities" value={`${day.activities.length} · ${durationLabel(totalActivityHours)}`} />
         <Divider className="my-1" />
-        <KeyValue label="Free from" value={day.freeFrom} />
+        <KeyValue label="Free from" value={<ClockTime time={day.freeFrom} />} />
         <Divider className="my-1" />
-        <KeyValue label="Pickup / drop" value={`${day.pickup} / ${day.drop}`} />
+        <KeyValue
+          label="Pickup / drop"
+          value={
+            <span className="inline-flex flex-wrap items-center justify-end gap-x-1.5">
+              <ClockTime time={day.pickup} />
+              <span className="text-muted-foreground">/</span>
+              <ClockTime time={day.drop} />
+            </span>
+          }
+        />
         <Divider className="my-1" />
         <KeyValue label="Meeting point" value={day.meetingPoint} />
       </Card>
@@ -81,19 +99,27 @@ export function DayDetails({ day }: { day: TripDay }) {
           </span>
         </div>
         <Card className="go-float-in mt-3">
-          <ol className="space-y-3">
-            {day.activities.map((activity) => (
-              <li key={activity.title} className="flex gap-3">
-                <span className="w-11 shrink-0 font-mono text-[12px] font-semibold tabular-nums text-primary">
-                  {activity.time}
-                </span>
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-semibold text-foreground">{activity.title}</span>
-                  <span className="text-[11px] text-muted-foreground">{durationLabel(activity.durationHrs)}</span>
-                </span>
-              </li>
-            ))}
+          <ol className="relative">
+            {day.activities.map((activity, index) => {
+              const isLast = index === day.activities.length - 1
+              return (
+                <li key={`${activity.time}-${activity.title}`} className="relative flex gap-3">
+                  <div className="flex min-w-[68px] shrink-0 justify-end pt-0.5">
+                    <ClockTime time={activity.time} className="text-[11px] font-semibold text-foreground" />
+                  </div>
+                  <div className="relative flex flex-col items-center">
+                    <span className="z-10 mt-1.5 size-2.5 shrink-0 rounded-full bg-primary ring-4 ring-primary/15" />
+                    {!isLast ? <span className="absolute bottom-0 top-4 w-px bg-border" /> : null}
+                  </div>
+                  <div className={cn('min-w-0 flex-1', isLast ? 'pb-0' : 'pb-5')}>
+                    <p className="text-[13px] font-semibold text-foreground">{activity.title}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {durationLabel(activity.durationHrs)}
+                    </p>
+                  </div>
+                </li>
+              )
+            })}
           </ol>
         </Card>
       </div>
@@ -201,7 +227,8 @@ export function DayDetails({ day }: { day: TripDay }) {
               <div className="min-w-0 flex-1">
                 <div className="text-[13px] font-semibold text-foreground">{day.driver.name}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  Arrives {day.driver.arrival} · {day.driver.car}
+                  Arrives <ClockTime time={day.driver.arrival} className="text-[11px] text-muted-foreground" /> ·{' '}
+                  {day.driver.car}
                 </div>
               </div>
               <a
@@ -245,25 +272,6 @@ export function DayDetails({ day }: { day: TripDay }) {
           </div>
         </div>
       ) : null}
-
-      <div className="mt-6">
-        <div className="flex items-center gap-2">
-          <Ticket className="size-4 text-primary" />
-          <Eyebrow>What&rsquo;s included</Eyebrow>
-        </div>
-        <Card className="go-float-in mt-3">
-          <ul className="space-y-2">
-            {day.inclusions.map((item) => (
-              <li key={item} className="flex items-start gap-2.5 text-[13px] text-foreground">
-                <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
-                  <Check className="size-3" />
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
 
       <div className="mt-6">
         <div className="flex items-center gap-2">

@@ -16,7 +16,7 @@ export const tripData: TripData = {
     destination: 'Vietnam',
     homeCity: 'Chennai',
     startDate: start,
-    endDate: start + 3 * DAY + 16 * HOUR,
+    endDate: start + 3 * DAY + 21 * HOUR,
     travellers: 4,
     brand: { name: 'LocoTrails' },
   },
@@ -25,27 +25,35 @@ export const tripData: TripData = {
       airline: { code: '6E', name: 'IndiGo', color: '#2b2fa8' },
       flightNumber: '1049',
       departTime: start,
+      arriveTime: start + 7 * HOUR,
       reportBy: start - 3 * HOUR,
-      durationHrs: 3.5,
+      durationHrs: 7,
+      stops: 'Via Bangkok (BKK) · 1 stop',
+      layoverNote: '1h 30m layover in Bangkok. Stay in the transit area — your boarding pass covers both legs.',
       from: { city: 'Chennai', code: 'MAA', terminal: 'T2', flag: '🇮🇳' },
-      to: { city: 'Bangkok', code: 'BKK', terminal: 'T1', flag: '🇹🇭' },
-    },
-    {
-      airline: { code: '6E', name: 'IndiGo', color: '#2b2fa8' },
-      flightNumber: '1049',
-      departTime: start + 5 * HOUR,
-      durationHrs: 2,
-      from: { city: 'Bangkok', code: 'BKK', terminal: 'T1', flag: '🇹🇭' },
       to: { city: 'Hanoi', code: 'HAN', terminal: 'T2', flag: '🇻🇳' },
+      document: {
+        name: 'Flight e-ticket · 6E 1049',
+        category: 'Boarding',
+        detail: 'Chennai (MAA) to Hanoi (HAN), via Bangkok. PNR LT7X2Q · Seat 14A · 20 kg + 7 kg per traveller.',
+      },
     },
     {
       airline: { code: '6E', name: 'IndiGo', color: '#2b2fa8' },
       flightNumber: '1050',
       departTime: start + 3 * DAY + 14 * HOUR,
+      arriveTime: start + 3 * DAY + 21 * HOUR,
       reportBy: start + 3 * DAY + 11 * HOUR,
-      durationHrs: 6,
+      durationHrs: 7,
+      stops: 'Via Bangkok (BKK) · 1 stop',
+      layoverNote: '1h 30m layover in Bangkok. Report at the IndiGo counter 3 hours before departure.',
       from: { city: 'Hanoi', code: 'HAN', terminal: 'T2', flag: '🇻🇳' },
       to: { city: 'Chennai', code: 'MAA', terminal: 'T2', flag: '🇮🇳' },
+      document: {
+        name: 'Return e-ticket · 6E 1050',
+        category: 'Boarding',
+        detail: 'Hanoi (HAN) to Chennai (MAA), via Bangkok. PNR LT7X2Q · Seat 14A · Report 3 hours before departure.',
+      },
     },
   ],
   baggage: {
@@ -209,7 +217,6 @@ export const tripData: TripData = {
         },
         { label: 'Dinner', detail: 'Welcome dinner in the Old Quarter', included: true },
       ],
-      inclusions: ['Airport pickup & transfer', 'Hotel check-in assistance', 'Old Quarter guided walk', 'Welcome dinner'],
       carry: ['Passport & visa', 'Light layer for the flight', 'Comfortable walking shoes', 'Rain cover'],
       bringExtra: [],
       notes: [
@@ -266,7 +273,6 @@ export const tripData: TripData = {
         },
         { label: 'Dinner', detail: 'Sunset dinner on the sundeck', included: true },
       ],
-      inclusions: ['Return transfers', 'Overnight cruise cabin', 'Kayaking & cave entry', 'All meals onboard', 'English-speaking guide'],
       carry: ['Swimwear', 'Sun hat & sunscreen', 'Camera', 'Motion-sickness tablets', 'A small overnight bag'],
       bringExtra: ['Extra set of clothes — you will get wet kayaking', 'Quick-dry towel', 'Waterproof pouch for your phone'],
       notes: [
@@ -322,7 +328,6 @@ export const tripData: TripData = {
         },
         { label: 'Dinner', detail: 'At liberty — on your own at the resort', included: false, onYourOwn: true },
       ],
-      inclusions: ['Return transfers', 'Trang An boat ride', 'Mua Cave entry', 'Cycling rental', 'Local guide'],
       carry: ['Sun hat & sunscreen', 'Shoes for the climb', 'Reusable water bottle', 'Insect repellent'],
       bringExtra: ['Extra pair of socks — the boat ride may splash', 'A light jacket for the early morning'],
       notes: [
@@ -378,7 +383,6 @@ export const tripData: TripData = {
         },
         { label: 'Dinner', detail: 'In flight / on return', included: false, onYourOwn: true },
       ],
-      inclusions: ['Day rooms to freshen up', 'Old Quarter market walk', 'Airport transfer', 'Check-in assistance'],
       carry: ['Passport & boarding pass', 'Duty-free shopping list', 'Phone charger in cabin bag', 'Light layer for the flight'],
       bringExtra: [],
       notes: [
@@ -419,41 +423,46 @@ export const tripData: TripData = {
     mustTryFood: ['Pho', 'Banh Mi', 'Cha Ca La Vong', 'Bun Cha'],
     mustTryDrinks: ['Egg coffee', 'Vietnamese iced coffee', 'Bia Hoi'],
   },
-  supportFaqs: [
+  faqs: [
     {
-      question: "My driver hasn't arrived. What do I do?",
+      question: 'Is it safe to eat from the local street vendors?',
       answer:
-        'Call your driver from the Today tab first. If you still need help, raise an issue here — a coordinator calls you within 2 minutes.',
+        'Absolutely — and it is one of the great joys of Vietnam. We point you to stalls we know and trust, and your coordinator can recommend a favourite near your hotel. If you would prefer, we will happily arrange a table at a vetted restaurant instead.',
     },
     {
-      question: 'Can I change today’s plan?',
+      question: 'Do I need to carry my passport everywhere?',
       answer:
-        'Often yes. Raise an issue or call your coordinator; changes depend on availability and any extra cost is confirmed before we proceed.',
+        'No. Leave it in your hotel safe and carry a photo of it for ID. We keep a secure copy on file as well, so if it is ever misplaced we can help you sort it out quickly and discreetly.',
     },
     {
-      question: 'The hotel room isn’t ready.',
+      question: 'Can I wear shorts at the beach?',
       answer:
-        'Speak to the front desk, then raise an issue so we can follow up with the hotel and arrange somewhere to freshen up.',
+        'Of course — beach and resort areas are relaxed, so pack your favourite shorts and swimwear. For temples and the Old Quarter we suggest covering shoulders and knees as a mark of respect; a light scarf in your day bag is all you need.',
     },
     {
-      question: 'My flight is delayed or cancelled.',
+      question: 'Is tipping expected?',
       answer:
-        'Call the airline and your coordinator right away. We will rearrange airport transfers and, if needed, the first night of your stay.',
+        'Never obligatory, always appreciated. If you would rather not think about it, we can arrange a discreet gratuity across your trip — just ask your coordinator and consider it handled.',
     },
     {
-      question: 'I’m not feeling well.',
+      question: 'Should I bargain at the markets?',
       answer:
-        'For anything urgent, call the 24×7 helpline immediately. For minor issues the hotel can arrange a doctor — raise an issue and we’ll coordinate.',
+        'A little friendly bargaining is part of the fun at Dong Xuan and around the Old Quarter. Smile, open around half, and settle where you are both happy. And if you would like us to source something for you, we will negotiate on your behalf.',
     },
     {
-      question: 'What if I lose my passport?',
+      question: 'Can I drink the tap water?',
       answer:
-        'Contact the 24×7 helpline immediately. We will help you with the police report and your embassy for an emergency travel document.',
+        'We recommend bottled or filtered water throughout — it is provided at your hotels and on the cruise. Your coordinator will keep you stocked, and we will flag the best spots for a cold drink along the way.',
     },
     {
-      question: 'A card didn’t work — where can I get cash?',
+      question: 'How do I get cash while travelling?',
       answer:
-        'ATMs are common in the cities on this trip. Carry some local cash for small vendors. If you’re stuck, raise an issue and we’ll guide you.',
+        'ATMs are easy to find in the cities, and your hotel can help. We suggest carrying a little local cash for markets and small cafes. If you are ever stuck, message your coordinator and we will guide you to the nearest option.',
+    },
+    {
+      question: 'What if I am not feeling well?',
+      answer:
+        'Tell your coordinator straight away — this is exactly what we are here for. We will arrange a doctor or a pharmacy run and gently adjust your day so you can rest. The 24×7 helpline is always just a call away.',
     },
   ],
   postTrip: {

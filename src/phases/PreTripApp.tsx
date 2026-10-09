@@ -4,14 +4,16 @@ import { ActionButton } from '../components/ActionButton'
 import { AppHeader } from '../components/AppHeader'
 import { BottomTabBar } from '../components/BottomTabBar'
 import type { TabItem } from '../components/BottomTabBar'
+import { DocumentPreview } from '../components/DocumentPreview'
 import { FlightBoard } from '../components/FlightBoard'
 import { MobileFrame } from '../components/MobileFrame'
 import { Card, Divider, Eyebrow, KeyValue, NoteCard, Pill, Screen, SectionTitle } from '../components/primitives'
 import { tripData } from '../data/trip'
 import { useCountdown } from '../hooks/useCountdown'
 import { cn } from '../lib/cn'
-import { formatClock, formatDate } from '../lib/format'
+import { formatDate } from '../lib/format'
 import { downloadPdf, wrapText } from '../lib/pdf'
+import type { DocumentItem } from '../types'
 
 const TABS: TabItem[] = [
   { id: 'home', label: 'Home', icon: Home },
@@ -29,28 +31,43 @@ interface PreTripAppProps {
 
 export function PreTripApp({ onExit, onStartTrip }: PreTripAppProps) {
   const [tab, setTab] = useState('home')
+  const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null)
   const activeLabel = TABS.find((item) => item.id === tab)?.label ?? ''
+  const { trip } = tripData
 
   return (
     <MobileFrame
       header={
-        <AppHeader
-          title={tripData.trip.title}
-          label={`Pre-Trip · ${activeLabel}`}
-          onBack={onExit}
-        />
+        <AppHeader title={trip.title} label={`Pre-Trip · ${activeLabel}`} onBack={onExit} />
       }
       footer={<BottomTabBar tabs={TABS} active={tab} onChange={setTab} />}
+      overlay={
+        previewDoc ? (
+          <DocumentPreview
+            doc={previewDoc}
+            onClose={() => setPreviewDoc(null)}
+            meta={[`Trip: ${trip.title}`, `Travellers: ${trip.travellers}`, `Destination: ${trip.destination}`]}
+          />
+        ) : null
+      }
     >
-      {tab === 'home' ? <HomeTab onStartTrip={onStartTrip} onGo={setTab} /> : null}
+      {tab === 'home' ? <HomeTab onStartTrip={onStartTrip} onGo={setTab} onOpenDocument={setPreviewDoc} /> : null}
       {tab === 'packing' ? <PackingTab /> : null}
-      {tab === 'documents' ? <DocumentsTab /> : null}
+      {tab === 'documents' ? <DocumentsTab onOpenDocument={setPreviewDoc} /> : null}
       {tab === 'connectivity' ? <ConnectivityTab /> : null}
     </MobileFrame>
   )
 }
 
-function HomeTab({ onStartTrip, onGo }: { onStartTrip: () => void; onGo: (tab: string) => void }) {
+function HomeTab({
+  onStartTrip,
+  onGo,
+  onOpenDocument,
+}: {
+  onStartTrip: () => void
+  onGo: (tab: string) => void
+  onOpenDocument: (doc: DocumentItem) => void
+}) {
   const { trip, flights, days } = tripData
   const countdown = useCountdown(trip.startDate)
   const nextFlight = flights[0]
@@ -80,7 +97,7 @@ function HomeTab({ onStartTrip, onGo }: { onStartTrip: () => void; onGo: (tab: s
         <div className="text-right text-[11px] text-muted-foreground">
           <p className="font-semibold text-foreground">{formatDate(trip.startDate)}</p>
           <p>
-            {nextFlight.airline.code} {nextFlight.flightNumber} · {formatClock(nextFlight.departTime)}
+            {nextFlight.airline.code} {nextFlight.flightNumber}
           </p>
         </div>
       </Card>
@@ -94,9 +111,10 @@ function HomeTab({ onStartTrip, onGo }: { onStartTrip: () => void; onGo: (tab: s
 
       <div className="mt-6">
         <Eyebrow>Your flights</Eyebrow>
-        <div className="go-float-in mt-3">
-          <FlightBoard flights={flights} />
-        </div>
+        <p className="mb-3 mt-1 text-[11px] text-muted-foreground">
+          Round trip · tap a flight for details and your e-ticket.
+        </p>
+        <FlightBoard flights={flights} onOpenDocument={onOpenDocument} />
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3">
@@ -238,7 +256,7 @@ function PackingTab() {
   )
 }
 
-function DocumentsTab() {
+function DocumentsTab({ onOpenDocument }: { onOpenDocument: (doc: DocumentItem) => void }) {
   const { documents, trip } = tripData
 
   function download(name: string, category: string, detail: string) {
@@ -266,7 +284,11 @@ function DocumentsTab() {
       <div className="mt-5 space-y-3">
         {documents.map((doc) => (
           <Card key={doc.name} className="go-float-in">
-            <div className="flex items-start gap-3">
+            <button
+              type="button"
+              onClick={() => onOpenDocument(doc)}
+              className="flex w-full items-start gap-3 text-left"
+            >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <FileText className="size-5" />
               </span>
@@ -275,14 +297,23 @@ function DocumentsTab() {
                 <div className="mt-2 text-[13px] font-semibold text-foreground">{doc.name}</div>
                 <p className="mt-1 text-[12px] text-muted-foreground">{doc.detail}</p>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => download(doc.name, doc.category, doc.detail)}
-              className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface text-[12px] font-semibold text-foreground transition-transform active:scale-[0.98]"
-            >
-              <Download className="size-4 text-primary" /> Download PDF
             </button>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenDocument(doc)}
+                className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-primary bg-primary/5 text-[12px] font-semibold text-primary transition-transform active:scale-[0.98]"
+              >
+                Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => download(doc.name, doc.category, doc.detail)}
+                className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface text-[12px] font-semibold text-foreground transition-transform active:scale-[0.98]"
+              >
+                <Download className="size-4 text-primary" /> Download
+              </button>
+            </div>
           </Card>
         ))}
       </div>

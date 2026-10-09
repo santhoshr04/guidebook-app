@@ -17,10 +17,14 @@ export interface Flight {
   airline: Airline
   flightNumber: string
   departTime: number
+  arriveTime: number
   from: Airport
   to: Airport
   reportBy?: number
   durationHrs?: number
+  stops?: string
+  layoverNote?: string
+  document: DocumentItem
 }
 
 export interface Baggage {
@@ -140,7 +144,6 @@ export interface TripDay {
   activities: Activity[]
   tickets: Ticket[]
   mapMarkers: MapMarker[]
-  inclusions: string[]
   carry: string[]
   bringExtra: string[]
   notes: string[]
@@ -171,7 +174,7 @@ export interface QuickRef {
   mustTryDrinks: string[]
 }
 
-export interface SupportFaq {
+export interface Faq {
   question: string
   answer: string
 }
@@ -214,6 +217,6 @@ export interface TripData {
   contacts: Contact[]
   cityBasics: CityBasics
   quickRef: QuickRef
-  supportFaqs: SupportFaq[]
+  faqs: Faq[]
   postTrip: PostTrip
 }

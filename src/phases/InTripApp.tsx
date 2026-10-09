@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import {
-  AlertTriangle,
   BookOpen,
   Building2,
   CalendarDays,
   ChevronDown,
   Download,
+  HelpCircle,
   Languages,
   LifeBuoy,
   Phone,
@@ -14,24 +14,26 @@ import {
   UtensilsCrossed,
   Wine,
 } from 'lucide-react'
-import { ActionButton } from '../components/ActionButton'
 import { AppHeader } from '../components/AppHeader'
 import { BottomTabBar } from '../components/BottomTabBar'
 import type { TabItem } from '../components/BottomTabBar'
 import { DayDetails } from '../components/DayDetails'
+import { DocumentPreview } from '../components/DocumentPreview'
+import { FlightBoard } from '../components/FlightBoard'
+import { IssueSheet } from '../components/IssueSheet'
 import { MobileFrame } from '../components/MobileFrame'
 import { RatingPanel } from '../components/RatingPanel'
-import { Card, Eyebrow, NoteCard, Pill, Screen, SectionTitle } from '../components/primitives'
+import { Card, Eyebrow, Pill, Screen, SectionTitle } from '../components/primitives'
 import { tripData } from '../data/trip'
 import { cn } from '../lib/cn'
 import { downloadPdf, wrapText } from '../lib/pdf'
-import type { Accommodation, Contact, Phrase } from '../types'
+import type { Accommodation, Contact, DocumentItem, Phrase } from '../types'
 
 const TABS: TabItem[] = [
   { id: 'today', label: 'Today', icon: CalendarDays },
   { id: 'tickets', label: 'Tickets', icon: Ticket },
   { id: 'reference', label: 'Reference', icon: BookOpen },
-  { id: 'support', label: 'Support', icon: LifeBuoy },
+  { id: 'faq', label: 'FAQ', icon: HelpCircle },
 ]
 
 interface InTripAppProps {
@@ -42,8 +44,20 @@ export function InTripApp({ onExit }: InTripAppProps) {
   const { days, trip } = tripData
   const [tab, setTab] = useState('today')
   const [dayIndex, setDayIndex] = useState(0)
+  const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null)
+  const [issuesOpen, setIssuesOpen] = useState(false)
   const day = days[dayIndex]
   const activeLabel = TABS.find((item) => item.id === tab)?.label ?? ''
+
+  const overlay = previewDoc ? (
+    <DocumentPreview
+      doc={previewDoc}
+      onClose={() => setPreviewDoc(null)}
+      meta={[`Trip: ${trip.title}`, `Travellers: ${trip.travellers}`, `Destination: ${trip.destination}`]}
+    />
+  ) : issuesOpen ? (
+    <IssueSheet onClose={() => setIssuesOpen(false)} />
+  ) : null
 
   return (
     <MobileFrame
@@ -52,16 +66,25 @@ export function InTripApp({ onExit }: InTripAppProps) {
           title={trip.title}
           label={tab === 'today' ? `Day ${day.n} of ${days.length} · ${day.place}` : `In-Trip · ${activeLabel}`}
           onBack={onExit}
+          action={
+            <button
+              type="button"
+              onClick={() => setIssuesOpen(true)}
+              aria-label="Raise an issue"
+              className="flex size-9 items-center justify-center rounded-full border border-border bg-surface text-destructive shadow-soft transition-colors hover:bg-muted/70 active:scale-95"
+            >
+              <LifeBuoy className="size-4" />
+            </button>
+          }
         />
       }
       footer={<BottomTabBar tabs={TABS} active={tab} onChange={setTab} />}
+      overlay={overlay}
     >
-      {tab === 'today' ? (
-        <TodayTab dayIndex={dayIndex} onSelectDay={setDayIndex} />
-      ) : null}
-      {tab === 'tickets' ? <TicketsTab /> : null}
+      {tab === 'today' ? <TodayTab dayIndex={dayIndex} onSelectDay={setDayIndex} /> : null}
+      {tab === 'tickets' ? <TicketsTab onOpenDocument={setPreviewDoc} /> : null}
       {tab === 'reference' ? <ReferenceTab /> : null}
-      {tab === 'support' ? <SupportTab /> : null}
+      {tab === 'faq' ? <FaqTab /> : null}
     </MobileFrame>
   )
 }
@@ -114,7 +137,7 @@ function TodayTab({ dayIndex, onSelectDay }: { dayIndex: number; onSelectDay: (i
   )
 }
 
-function TicketsTab() {
+function TicketsTab({ onOpenDocument }: { onOpenDocument: (doc: DocumentItem) => void }) {
   const { days, flights, trip } = tripData
 
   function downloadTicket(name: string, detail: string) {
@@ -133,33 +156,8 @@ function TicketsTab() {
 
       <div className="mt-5">
         <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-primary">Flights</p>
-        <div className="mt-3 space-y-2.5">
-          {flights.map((flight, index) => {
-            const name = `${flight.airline.name} ${flight.airline.code} ${flight.flightNumber} · ${flight.from.code} to ${flight.to.code}`
-            const detail = `${flight.from.city} (${flight.from.code}) to ${flight.to.city} (${flight.to.code}). Departure ${new Date(flight.departTime).toLocaleString()}.`
-            return (
-              <Card key={`${name}-${index}`} className="go-float-in">
-                <div className="flex items-start gap-3">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Ticket className="size-5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <Pill>Flight</Pill>
-                    <div className="mt-2 text-[13px] font-semibold text-foreground">{name}</div>
-                    <p className="mt-1 text-[12px] text-muted-foreground">{detail}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => downloadTicket(name, detail)}
-                  className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface text-[12px] font-semibold text-foreground transition-transform active:scale-[0.98]"
-                >
-                  <Download className="size-4 text-primary" /> Download PDF
-                </button>
-              </Card>
-            )
-          })}
-        </div>
+        <p className="mb-3 mt-1 text-[11px] text-muted-foreground">Tap a flight to expand and open its e-ticket.</p>
+        <FlightBoard flights={flights} onOpenDocument={onOpenDocument} />
       </div>
 
       {days.map((day) =>
@@ -332,6 +330,44 @@ function ReferenceTab() {
   )
 }
 
+function FaqTab() {
+  const { faqs, trip } = tripData
+  const [open, setOpen] = useState<string | null>(faqs[0]?.question ?? null)
+
+  return (
+    <Screen>
+      <Eyebrow>Destination FAQ</Eyebrow>
+      <SectionTitle className="mt-1">All about {trip.destination}</SectionTitle>
+      <p className="mt-2 text-[13px] text-muted-foreground">
+        Handpicked answers so you can simply enjoy the trip. For anything else, your coordinator is a tap away.
+      </p>
+
+      <div className="mt-5 space-y-2.5">
+        {faqs.map((faq) => {
+          const isOpen = open === faq.question
+          return (
+            <Card key={faq.question} className="go-float-in">
+              <button
+                type="button"
+                onClick={() => setOpen(isOpen ? null : faq.question)}
+                className="flex w-full items-center justify-between gap-3 text-left"
+              >
+                <span className="text-[13px] font-semibold text-foreground">{faq.question}</span>
+                <ChevronDown
+                  className={cn('size-4 shrink-0 text-primary transition-transform duration-200', isOpen && 'rotate-180')}
+                />
+              </button>
+              {isOpen ? (
+                <p className="go-fade-in mt-2 text-[12px] leading-relaxed text-muted-foreground">{faq.answer}</p>
+              ) : null}
+            </Card>
+          )
+        })}
+      </div>
+    </Screen>
+  )
+}
+
 function AccommodationCard({ stay }: { stay: Accommodation }) {
   return (
     <Card className="go-float-in">
@@ -371,151 +407,5 @@ function ContactCard({ contact }: { contact: Contact }) {
         <Phone className="size-3.5" /> Call
       </a>
     </Card>
-  )
-}
-
-interface Issue {
-  id: number
-  type: string
-  text: string
-}
-
-const ISSUE_TYPES = ['Driver', 'Hotel', 'Activity', 'Other']
-
-function SupportTab() {
-  const { supportFaqs } = tripData
-  const [openFaq, setOpenFaq] = useState<string | null>(supportFaqs[0]?.question ?? null)
-  const [showForm, setShowForm] = useState(false)
-  const [type, setType] = useState('Driver')
-  const [text, setText] = useState('')
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [raised, setRaised] = useState(false)
-
-  function submit() {
-    const trimmed = text.trim()
-    if (!trimmed) return
-    setIssues((prev) => [{ id: Date.now(), type, text: trimmed }, ...prev])
-    setText('')
-    setRaised(true)
-    setShowForm(false)
-  }
-
-  return (
-    <Screen>
-      <Eyebrow>Trip Support</Eyebrow>
-      <SectionTitle className="mt-1">How can we help?</SectionTitle>
-      <p className="mt-2 text-[13px] text-muted-foreground">
-        Quick answers to common questions — and a direct line to our team if you still need help.
-      </p>
-
-      <div className="mt-5 space-y-2.5">
-        {supportFaqs.map((faq) => {
-          const open = openFaq === faq.question
-          return (
-            <Card key={faq.question} className="go-float-in">
-              <button
-                type="button"
-                onClick={() => setOpenFaq(open ? null : faq.question)}
-                className="flex w-full items-center justify-between gap-3 text-left"
-              >
-                <span className="text-[13px] font-semibold text-foreground">{faq.question}</span>
-                <ChevronDown
-                  className={cn(
-                    'size-4 shrink-0 text-primary transition-transform duration-200',
-                    open && 'rotate-180',
-                  )}
-                />
-              </button>
-              {open ? (
-                <p className="go-fade-in mt-2 text-[12px] leading-relaxed text-muted-foreground">{faq.answer}</p>
-              ) : null}
-            </Card>
-          )
-        })}
-      </div>
-
-      {raised ? (
-        <NoteCard tone="success" className="go-float-in mt-5">
-          <strong>Issue received.</strong> Our team will call you within 2 minutes.
-        </NoteCard>
-      ) : null}
-
-      {!showForm ? (
-        <Card className="go-float-in mt-5 border-l-4 border-l-primary">
-          <div className="flex items-center gap-2">
-            <LifeBuoy className="size-4 text-primary" />
-            <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-primary">Still need help?</span>
-          </div>
-          <p className="mt-2 text-[12px] text-muted-foreground">
-            Raise an issue and a coordinator calls you within 2 minutes.
-          </p>
-          <ActionButton
-            className="mt-3"
-            variant="destructive"
-            onClick={() => setShowForm(true)}
-            icon={<AlertTriangle className="size-4" />}
-          >
-            Raise an issue
-          </ActionButton>
-        </Card>
-      ) : (
-        <Card className="go-detail-enter mt-5">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-            What&rsquo;s it about?
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {ISSUE_TYPES.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setType(item)}
-                className={cn(
-                  'rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all active:scale-95',
-                  type === item
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-surface text-muted-foreground hover:bg-muted/50',
-                )}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-          <textarea
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            rows={4}
-            placeholder="Tell us what happened…"
-            className="mt-3 w-full resize-none rounded-xl border border-border bg-surface p-3 text-[13px] outline-none focus:border-primary"
-          />
-          <ActionButton className="mt-3" variant="destructive" onClick={submit} pulse>
-            Raise issue now
-          </ActionButton>
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="mt-2 w-full text-center text-[11px] font-semibold text-muted-foreground"
-          >
-            Cancel
-          </button>
-        </Card>
-      )}
-
-      {issues.length > 0 ? (
-        <div className="mt-6">
-          <Eyebrow>Your issues</Eyebrow>
-          <div className="mt-3 space-y-2.5">
-            {issues.map((issue) => (
-              <Card key={issue.id} className="go-list-swap flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <Pill>{issue.type}</Pill>
-                  <p className="mt-2 text-[13px] text-foreground">{issue.text}</p>
-                </div>
-                <Pill className="border-warning text-warning">Open</Pill>
-              </Card>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </Screen>
   )
 }
